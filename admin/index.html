@@ -1,0 +1,1146 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tower Slot Admin</title>
+  <style>
+    :root{--bg:#0b1020;--card:#121a2f;--muted:#9aa6c0;--txt:#e8edf8;--acc:#3b82f6;--ok:#22c55e;--bad:#ef4444;--warn:#f59e0b}
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(160deg,#0a0f1d,#111935);font-family:system-ui,sans-serif;color:var(--txt)}
+    .wrap{max-width:1260px;margin:24px auto;padding:0 14px}
+    .card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:14px}
+    h1,h2{margin:0 0 10px} h1{font-size:22px} h2{font-size:16px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}.col{flex:1;min-width:220px}
+    .col-2{flex:2;min-width:320px}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    input,select,button,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#0f172a;color:var(--txt)}
+    textarea{min-height:74px;resize:vertical}
+    button{cursor:pointer;background:linear-gradient(135deg,#2563eb,#1d4ed8);font-weight:700;border:none}
+    button.gray{background:#1f2937} button.green{background:linear-gradient(135deg,#16a34a,#15803d)} button.red{background:linear-gradient(135deg,#dc2626,#b91c1c)}
+    button.warn{background:linear-gradient(135deg,#f59e0b,#d97706)}
+    .muted{color:var(--muted);font-size:12px}.hidden{display:none}.pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px}
+    .pill.ok{background:rgba(34,197,94,.2);color:#86efac}.pill.no{background:rgba(239,68,68,.2);color:#fca5a5}.pill.warn{background:rgba(245,158,11,.2);color:#fcd34d}
+    table{width:100%;border-collapse:collapse;font-size:13px} th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .actions{display:flex;gap:6px;flex-wrap:wrap}
+    .actions button{width:auto;padding:7px 10px;border-radius:8px;font-size:12px}
+    .search-wrap{display:flex;align-items:center;gap:8px;background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:8px 10px;min-width:260px}
+    .search-wrap svg{color:#8aa0c8;flex:0 0 auto}
+    .search-wrap input{border:none;outline:none;background:transparent;padding:0;color:var(--txt);font-size:13px}
+    .table-tools{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 10px}
+    .pager{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-top:10px}
+    .pager .pager-btn{width:auto;min-width:34px;padding:6px 10px;border-radius:8px;background:#111b33;border:1px solid rgba(255,255,255,.12);color:#dbe4ff}
+    .pager .pager-btn.active{background:linear-gradient(135deg,#2563eb,#1d4ed8);border-color:transparent}
+    .pager .pager-btn:disabled{opacity:.5;cursor:not-allowed}
+    .code{font-family:Consolas,monospace;font-size:12px;word-break:break-all}
+    .preview{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:#0f172a;border:1px dashed rgba(255,255,255,.14);min-height:58px}
+    .preview img{max-height:44px;max-width:180px;object-fit:contain;border-radius:6px;background:#fff}
+    .msg-ok{color:#86efac}.msg-err{color:#fca5a5}
+    .admin-layout{display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start}
+    .admin-sidebar{position:sticky;top:18px;background:#0f172a;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
+    .admin-side-title{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:2px 4px 8px}
+    .admin-side-btn{display:block;width:100%;text-align:left;background:#0b1020;border:1px solid rgba(255,255,255,.08);padding:9px 10px;border-radius:9px;color:#dbe4ff;font-size:13px;margin-bottom:7px}
+    .admin-side-btn:hover{background:#111b33}
+    .admin-main{min-width:0}
+    @media (max-width:980px){
+      .admin-layout{grid-template-columns:1fr}
+      .admin-sidebar{position:static}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card" id="loginCard">
+    <h1>Admin Tower Slot</h1>
+    <p class="muted">Entre com telefone e senha de administrador.</p>
+    <div class="row">
+      <div class="col">
+        <label>Telefone</label>
+        <input id="loginTel" placeholder="11999999999" />
+      </div>
+      <div class="col">
+        <label>Senha</label>
+        <input id="loginSenha" type="password" placeholder="******" />
+      </div>
+      <div class="col" style="align-self:flex-end">
+        <button id="btnLogin">Entrar</button>
+      </div>
+    </div>
+    <p class="muted" id="loginMsg"></p>
+  </div>
+
+  <div id="panel" class="hidden">
+    <div class="admin-layout">
+      <aside class="admin-sidebar">
+        <div class="admin-side-title">Navegação</div>
+        <button class="admin-side-btn" data-go="sec-topo">Visão Geral</button>
+        <button class="admin-side-btn" data-go="sec-config">Configuração</button>
+        <button class="admin-side-btn" data-go="sec-users">Usuários</button>
+        <button class="admin-side-btn" data-go="sec-saques">Saques Normais</button>
+        <button class="admin-side-btn" data-go="sec-saques-afil">Saques Comissão</button>
+        <button class="admin-side-btn" data-go="sec-bonus-users">Bônus/Rollover</button>
+      </aside>
+
+      <div class="admin-main">
+    <div class="card top" id="sec-topo">
+      <div>
+        <h1>Painel Admin</h1>
+        <div class="muted" id="adminInfo"></div>
+      </div>
+      <button class="gray" id="btnLogout" style="width:auto;padding:10px 14px">Sair</button>
+    </div>
+
+    <div class="card" id="sec-config">
+      <h2>Configuracao do Jogo e Plataforma</h2>
+      <div class="row">
+        <div class="col">
+          <label>Dificuldade global</label>
+          <select id="cfgDificuldade">
+            <option value="super_facil">super_facil</option>
+            <option value="facil">facil</option>
+            <option value="normal">normal</option>
+            <option value="dificil">dificil</option>
+            <option value="super_dificil">super_dificil</option>
+            <option value="impossivel">impossivel</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Multiplicador padrao (usuarios comuns)</label>
+          <input id="cfgMult" type="number" step="0.1" min="1" />
+        </div>
+        <div class="col">
+          <label>Meta influencer (fixa)</label>
+          <input id="cfgMultInfluencer" type="number" step="0.1" min="1" value="3" readonly />
+        </div>
+        <div class="col">
+          <label>Risco global (killer chance 0~1)</label>
+          <input id="cfgKco" type="number" step="0.01" min="0" max="1" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label>Modo payout por plataforma</label>
+          <select id="cfgPayoutMode">
+            <option value="fixed">Fixo</option>
+            <option value="proporcional">Proporcional a aposta</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Payout fixo por pulo (R$)</label>
+          <input id="cfgPayoutFixo" type="number" step="0.01" min="0.01" />
+        </div>
+        <div class="col">
+          <label>Taxa proporcional por plataforma</label>
+          <input id="cfgTaxa" type="number" step="0.01" min="0.01" />
+        </div>
+      </div>
+
+      <h2 style="margin-top:18px">Tower Slot - Multiplicador Progressivo</h2>
+      <div class="row">
+        <div class="col">
+          <label>Multiplicador inicial (1o acerto = base)</label>
+          <input id="cfgMultIni" type="number" step="0.05" min="0.1" />
+        </div>
+        <div class="col">
+          <label>Incremento por acerto (ex: 0.2 = +0,2x)</label>
+          <input id="cfgMultInc" type="number" step="0.05" min="0.01" />
+        </div>
+        <div class="col">
+          <label>Multiplicador maximo (0 = sem limite)</label>
+          <input id="cfgMultMax" type="number" step="0.5" min="0" />
+        </div>
+        <div class="col">
+          <label>Acertos minimos para sacar</label>
+          <input id="cfgMinAcertos" type="number" step="1" min="1" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <span class="muted" id="cfgMultPreview">Previa: --</span>
+        </div>
+      </div>
+
+
+
+      <div class="row">
+        <div class="col">
+          <label>Influencer mode (facil habilitado)</label>
+          <select id="cfgInfluencerMode">
+            <option value="1">Ativo</option>
+            <option value="0">Inativo</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Comissao padrao da plataforma (%)</label>
+          <input id="cfgComissaoPadrao" type="number" step="0.01" min="0" max="100" />
+        </div>
+        <div class="col">
+          <label>Gateway provider</label>
+          <select id="cfgGateway">
+            <option value="mock">mock</option>
+            <option value="mercadopago">mercadopago</option>
+            <option value="ecompag">ecompag</option>
+            <option value="sigilopay">sigilopay</option>
+            <option value="amplopay">amplopay</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Registro aberto</label>
+          <select id="cfgRegistroAberto">
+            <option value="1">Sim</option>
+            <option value="0">Nao</option>
+          </select>
+        </div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,.09);margin:14px 0">
+      <h2 style="margin-bottom:8px">Bonus (Primeiro Deposito)</h2>
+      <div class="row">
+        <div class="col">
+          <label>Ativar bonus de primeiro deposito</label>
+          <select id="cfgBonusPrimeiroEnabled">
+            <option value="1">Ativo</option>
+            <option value="0">Inativo</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Aplicar bonus</label>
+          <select id="cfgBonusPrimeiroModo">
+            <option value="primeiro_deposito">Somente no primeiro deposito</option>
+            <option value="sempre">Sempre que depositar</option>
+          </select>
+        </div>
+        <div class="col">
+          <label>Percentual do bonus (%)</label>
+          <input id="cfgBonusPrimeiroPerc" type="number" min="0" step="1" />
+        </div>
+        <div class="col">
+          <label>Rollover multiplicador (x)</label>
+          <input id="cfgBonusPrimeiroRollover" type="number" min="1" step="0.1" />
+        </div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid rgba(255,255,255,.09);margin:14px 0">
+      <div class="row">
+        <div class="col">
+          <label>Nome da plataforma</label>
+          <input id="cfgSiteNome" placeholder="Tower Slot" />
+        </div>
+        <div class="col">
+          <label>URL logo da plataforma</label>
+          <input id="cfgLogo" placeholder="https://seu-dominio.com/logo.png" />
+        </div>
+        <div class="col">
+          <label>URL favicon (aba do navegador)</label>
+          <input id="cfgFavicon" placeholder="https://seu-dominio.com/favicon.ico" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col col-2">
+          <label>Banner principal (imagem)</label>
+          <input id="cfgBannerUrl" placeholder="https://seu-dominio.com/banner.jpg" />
+        </div>
+        <div class="col">
+          <label>Link do banner (opcional)</label>
+          <input id="cfgBannerLink" placeholder="https://seu-link.com" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col col-2">
+          <div class="preview" style="min-height:auto">
+            <span class="muted">
+              Você pode subir uma imagem diretamente do seu computador.
+              Caso prefira usar link, utilize um link direto de imagem (terminado em .jpg, .png ou .webp).
+              Links inválidos podem causar erro no carregamento.
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label>Upload da logo</label>
+          <input id="cfgLogoFile" type="file" accept=".jpg,.jpeg,.png,.webp,.ico" />
+          <button class="gray" id="btnUploadLogo" type="button" style="margin-top:6px">Selecionar imagem e enviar</button>
+          <p class="muted" id="cfgLogoUploadMsg"></p>
+        </div>
+        <div class="col">
+          <label>Upload do banner</label>
+          <input id="cfgBannerFile" type="file" accept=".jpg,.jpeg,.png,.webp" />
+          <button class="gray" id="btnUploadBanner" type="button" style="margin-top:6px">Selecionar imagem e enviar</button>
+          <p class="muted" id="cfgBannerUploadMsg"></p>
+        </div>
+        <div class="col">
+          <label>Upload do favicon</label>
+          <input id="cfgFaviconFile" type="file" accept=".ico,.png,.jpg,.jpeg,.webp" />
+          <button class="gray" id="btnUploadFavicon" type="button" style="margin-top:6px">Selecionar imagem e enviar</button>
+          <p class="muted" id="cfgFaviconUploadMsg"></p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label>Preview logo</label>
+          <div class="preview" id="logoPreview"></div>
+        </div>
+        <div class="col col-2">
+          <label>Preview banner</label>
+          <div class="preview" id="bannerPreview"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col"><button class="green" id="btnSalvarCfg">Salvar Configuracoes</button></div>
+      </div>
+      <p class="muted" id="cfgMsg"></p>
+    </div>
+
+    <div class="card" id="sec-users">
+      <div class="top">
+        <h2>Usuarios</h2>
+        <button id="btnReloadUsers" style="width:auto;padding:8px 12px">Atualizar</button>
+      </div>
+      <p class="muted">Acoes: influencer, modo facil por influencer, comissao personalizada, credito e limpeza de saldo de comissao.</p>
+      <div class="table-tools">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input id="usersBusca" placeholder="Buscar por numero ou apelido" />
+        </div>
+      </div>
+      <div style="overflow:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Usuario</th><th>Apelido</th><th>Saldo</th><th>Afiliado</th><th>Comissao %</th><th>Admin</th><th>Influencer</th><th>Facil</th><th>Acao</th>
+            </tr>
+          </thead>
+          <tbody id="usersBody"></tbody>
+        </table>
+      </div>
+      <div id="usersPager" class="pager"></div>
+    </div>
+
+    <div class="card" id="sec-saques">
+      <div class="top">
+        <h2>Saques Normais</h2>
+        <div class="actions">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input id="saquesBusca" placeholder="Buscar por numero ou apelido" />
+          </div>
+          <select id="saqueStatus" style="width:auto;min-width:140px">
+            <option value="pendente">Pendente</option>
+            <option value="aprovado">Aprovado</option>
+            <option value="recusado">Recusado</option>
+            <option value="todos">Todos</option>
+          </select>
+          <button id="btnReloadSaques" style="width:auto;padding:8px 12px">Atualizar</button>
+        </div>
+      </div>
+      <div style="overflow:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Usuario</th><th>Apelido/Nome conta</th><th>Tipo</th><th>Valor</th><th>PIX</th><th>Status</th><th>Criado em</th><th>Acao</th>
+            </tr>
+          </thead>
+          <tbody id="saquesBody"></tbody>
+        </table>
+      </div>
+      <div id="saquesPager" class="pager"></div>
+      <p class="muted" id="saquesMsg"></p>
+    </div>
+
+    <div class="card" id="sec-saques-afil">
+      <div class="top">
+        <h2>Saques de Comissao (Indicar)</h2>
+        <div class="actions">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input id="saquesAfilBusca" placeholder="Buscar por numero ou apelido" />
+          </div>
+          <select id="saqueAfilStatus" style="width:auto;min-width:140px">
+            <option value="pendente">Pendente</option>
+            <option value="pago">Pago</option>
+            <option value="recusado">Recusado</option>
+            <option value="todos">Todos</option>
+          </select>
+          <button id="btnReloadSaquesAfil" style="width:auto;padding:8px 12px">Atualizar</button>
+        </div>
+      </div>
+      <div style="overflow:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Usuario</th><th>Apelido/Nome conta</th><th>PIX</th><th>Valor</th><th>Status</th><th>Data solicitacao</th><th>Acao</th>
+            </tr>
+          </thead>
+          <tbody id="saquesAfilBody"></tbody>
+        </table>
+      </div>
+      <div id="saquesAfilPager" class="pager"></div>
+      <p class="muted" id="saquesAfilMsg"></p>
+    </div>
+
+    <div class="card" id="sec-bonus-users">
+      <div class="top">
+        <h2>Usuarios com Bonus de Primeiro Deposito</h2>
+        <button id="btnReloadBonusPrimeiro" style="width:auto;padding:8px 12px">Atualizar</button>
+      </div>
+      <div style="overflow:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Usuario</th><th>Deposito</th><th>Bonus</th><th>Total c/ bonus</th><th>Rollover exigido</th><th>Rollover atual</th><th>Rollover restante</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="bonusPrimeiroBody"></tbody>
+        </table>
+      </div>
+      <p class="muted" id="bonusPrimeiroMsg"></p>
+    </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const API_BASE = '/api';
+let token = localStorage.getItem('hw_admin_token') || '';
+let influencerEasyUsers = new Set();
+let influencerEasyAll = true;
+const PAGE_SIZE = 15;
+const listState = {
+  users: { raw: [], filtered: [], page: 1, query: '' },
+  saques: { raw: [], filtered: [], page: 1, query: '' },
+  saquesAfil: { raw: [], filtered: [], page: 1, query: '' },
+};
+
+function fmt(v){ return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+function authHeaders(){ return {'Content-Type':'application/json','Authorization':'Bearer '+token}; }
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function parseMoneyBR(v){
+  const n = parseFloat(String(v || '').replace(/\./g,'').replace(',', '.').replace(/[^0-9.\-]/g,''));
+  return Number.isFinite(n) ? n : 0;
+}
+
+function normalizeSearch(v){
+  return String(v ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function listFilter(list, query, pickFields){
+  const q = normalizeSearch(query);
+  if (!q) return list.slice();
+  return list.filter(item => {
+    const text = normalizeSearch(pickFields(item).join(' '));
+    return text.includes(q);
+  });
+}
+
+function renderPager(containerId, currentPage, totalPages, onChange){
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  if (totalPages <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const start = Math.max(1, currentPage - 2);
+  const end = Math.min(totalPages, start + 4);
+  let html = `<button class="pager-btn" data-page="${Math.max(1, currentPage - 1)}" ${currentPage === 1 ? 'disabled' : ''}>‹</button>`;
+  for (let p = start; p <= end; p++) {
+    html += `<button class="pager-btn ${p === currentPage ? 'active' : ''}" data-page="${p}">${p}</button>`;
+  }
+  html += `<button class="pager-btn" data-page="${Math.min(totalPages, currentPage + 1)}" ${currentPage === totalPages ? 'disabled' : ''}>›</button>`;
+  container.innerHTML = html;
+  container.querySelectorAll('button[data-page]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      const page = Number(btn.dataset.page || 1);
+      onChange(page);
+    });
+  });
+}
+
+async function req(method,path,body,auth=true){
+  const h={'Content-Type':'application/json'};
+  if(auth) h['Authorization']='Bearer '+token;
+  const r = await fetch(API_BASE+path,{method,headers:h,body:body?JSON.stringify(body):undefined});
+  const d = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error||('Erro '+r.status));
+  return d;
+}
+
+async function uploadAdminImage(kind, file){
+  const fd = new FormData();
+  fd.append('kind', kind);
+  fd.append('image', file);
+  const r = await fetch(API_BASE + '/admin/upload-image', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token },
+    body: fd
+  });
+  const d = await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(d.error || ('Erro '+r.status));
+  return d;
+}
+
+async function runImageUpload(opts){
+  const input = document.getElementById(opts.fileInputId);
+  const msg = document.getElementById(opts.msgId);
+  if(!input || !input.files || !input.files[0]){
+    if (input && typeof input.click === 'function') input.click();
+    return;
+  }
+  if(msg){
+    msg.className = 'muted';
+    msg.textContent = 'Enviando...';
+  }
+  try{
+    const up = await uploadAdminImage(opts.kind, input.files[0]);
+    const urlInput = document.getElementById(opts.urlInputId);
+    if(urlInput) urlInput.value = up.url || '';
+    if(opts.previewId){
+      renderImagePreview(opts.previewId, up.url || '', opts.previewFallback || '');
+    }
+    if(msg){
+      msg.className = 'muted msg-ok';
+      msg.textContent = 'Upload concluido com sucesso.';
+    }
+  }catch(e){
+    if(msg){
+      msg.className = 'muted msg-err';
+      msg.textContent = e.message || 'Falha no upload.';
+    }
+  }
+}
+
+function renderImagePreview(targetId, url, fallback){
+  const el = document.getElementById(targetId);
+  if(!el) return;
+  if(url){
+    el.innerHTML = '<img src="'+esc(url)+'" alt="preview" onerror="this.remove()"><span class="muted code">'+esc(url)+'</span>';
+  }else{
+    el.innerHTML = '<span class="muted">'+fallback+'</span>';
+  }
+}
+
+async function login(){
+  const tel=document.getElementById('loginTel').value.replace(/\D/g,'');
+  const senha=document.getElementById('loginSenha').value;
+  try{
+    const d=await req('POST','/admin/login',{telefone:tel,senha},false);
+    token=d.token; localStorage.setItem('hw_admin_token',token);
+    document.getElementById('loginMsg').textContent='';
+    await bootPanel();
+  }catch(e){ document.getElementById('loginMsg').textContent=e.message; }
+}
+
+function logout(){ token=''; localStorage.removeItem('hw_admin_token'); location.reload(); }
+
+async function bootPanel(){
+  try{
+    const me=await req('GET','/admin/me');
+    document.getElementById('adminInfo').textContent='Logado como '+(me.user.telefone||'admin');
+    document.getElementById('loginCard').classList.add('hidden');
+    document.getElementById('panel').classList.remove('hidden');
+    await loadConfig();
+    await Promise.all([loadUsers(), loadSaques(), loadSaquesAfiliado(), loadBonusPrimeiroDepositoUsers()]);
+  }catch(_){
+    document.getElementById('loginCard').classList.remove('hidden');
+    document.getElementById('panel').classList.add('hidden');
+  }
+}
+
+async function loadConfig(){
+  const d=await req('GET','/admin/config');
+  const game=d.game||{}, pub=d.public||{}, gw=d.gateway||{}, ind=d.indicacao||{}, bpd=d.bonus_primeiro_deposito||{};
+
+  document.getElementById('cfgDificuldade').value = game.dificuldade || 'normal';
+  document.getElementById('cfgMult').value = game.multiplicador ?? 7;
+  document.getElementById('cfgMultInfluencer').value = game.influencer_meta_multiplicador ?? 3;
+  document.getElementById('cfgKco').value = game.killer_chance_global ?? 0.12;
+  document.getElementById('cfgPayoutMode').value = game.payout_mode || 'fixed';
+  document.getElementById('cfgPayoutFixo').value = game.payout_por_plataforma_fixo ?? 0.05;
+  document.getElementById('cfgTaxa').value = game.taxa_por_plataforma ?? 0.10;
+  document.getElementById('cfgMultIni').value = game.multiplicador_inicial ?? 1;
+  document.getElementById('cfgMultInc').value = game.multiplicador_incremento ?? 0.2;
+  document.getElementById('cfgMultMax').value = game.multiplicador_max ?? 0;
+  document.getElementById('cfgMinAcertos').value = game.min_acertos_saque ?? 5;
+  atualizarPreviaMult();
+  document.getElementById('cfgInfluencerMode').value = Number(game.influencer_mode ? 1 : 0).toString();
+  document.getElementById('cfgComissaoPadrao').value = Number(ind.comissao_nivel1_perc ?? 5);
+
+  const gwProvider = (gw.provider || 'mock').toLowerCase();
+  document.getElementById('cfgGateway').value = gwProvider === 'ecopag' ? 'ecompag' : gwProvider;
+  document.getElementById('cfgRegistroAberto').value = Number(pub.registro_aberto ? 1 : 0).toString();
+  document.getElementById('cfgBonusPrimeiroEnabled').value = Number(bpd.enabled === false ? 0 : 1).toString();
+  document.getElementById('cfgBonusPrimeiroModo').value = (String(bpd.modo_aplicacao || bpd.apply_mode || 'primeiro_deposito').toLowerCase() === 'sempre' || String(bpd.modo_aplicacao || bpd.apply_mode || '').toLowerCase() === 'always') ? 'sempre' : 'primeiro_deposito';
+  document.getElementById('cfgBonusPrimeiroPerc').value = Number(bpd.percentual_bonus ?? 100);
+  document.getElementById('cfgBonusPrimeiroRollover').value = Number(bpd.rollover_multiplicador ?? 3);
+
+  document.getElementById('cfgSiteNome').value = pub.site_nome || 'Tower Slot';
+  document.getElementById('cfgLogo').value = pub.site_logo_url || '';
+  document.getElementById('cfgFavicon').value = pub.site_favicon_url || '';
+
+  let bannerUrl = pub.banner_url || '';
+  let bannerLink = pub.banner_link || '';
+  if(!bannerUrl && Array.isArray(pub.banners) && pub.banners.length){
+    bannerUrl = pub.banners[0]?.url || '';
+    bannerLink = pub.banners[0]?.link || '';
+  }
+  document.getElementById('cfgBannerUrl').value = bannerUrl;
+  document.getElementById('cfgBannerLink').value = bannerLink;
+
+  renderImagePreview('logoPreview', pub.site_logo_url || '', 'Sem logo definida (usa icone + nome)');
+  renderImagePreview('bannerPreview', bannerUrl, 'Sem banner definido');
+
+  influencerEasyAll = !Object.prototype.hasOwnProperty.call(game, 'influencer_easy_users');
+  influencerEasyUsers = new Set((Array.isArray(game.influencer_easy_users) ? game.influencer_easy_users : []).map(v => Number(v)));
+}
+
+function atualizarPreviaMult(){
+  const el = document.getElementById('cfgMultPreview');
+  if(!el) return;
+  const ini = parseFloat(document.getElementById('cfgMultIni').value||'1');
+  const inc = parseFloat(document.getElementById('cfgMultInc').value||'0.2');
+  const max = parseFloat(document.getElementById('cfgMultMax').value||'0');
+  const min = parseInt(document.getElementById('cfgMinAcertos').value||'5',10);
+  const seq = [];
+  for(let n=0;n<=Math.max(min,6);n++){
+    let m = ini + n*inc;
+    if(max>0) m = Math.min(m,max);
+    seq.push('x'+m.toFixed(2));
+  }
+  el.textContent = 'Previa: '+seq.join(' - ')+' | saque liberado no '+min+'o acerto';
+}
+['cfgMultIni','cfgMultInc','cfgMultMax','cfgMinAcertos'].forEach(function(id){
+  document.addEventListener('input', function(e){ if(e.target && e.target.id===id) atualizarPreviaMult(); });
+});
+
+async function saveConfig(){
+  const bannerUrl = document.getElementById('cfgBannerUrl').value.trim();
+  const bannerLink = document.getElementById('cfgBannerLink').value.trim();
+  const gamePayload={
+      dificuldade:document.getElementById('cfgDificuldade').value,
+      multiplicador:parseFloat(document.getElementById('cfgMult').value||'7'),
+      killer_chance_global:parseFloat(document.getElementById('cfgKco').value||'0.12'),
+      payout_mode:document.getElementById('cfgPayoutMode').value,
+      payout_por_plataforma_fixo:parseFloat(document.getElementById('cfgPayoutFixo').value||'0.05'),
+      taxa_por_plataforma:parseFloat(document.getElementById('cfgTaxa').value||'0.10'),
+      multiplicador_inicial:parseFloat(document.getElementById('cfgMultIni').value||'1'),
+      multiplicador_incremento:parseFloat(document.getElementById('cfgMultInc').value||'0.2'),
+      multiplicador_max:parseFloat(document.getElementById('cfgMultMax').value||'0'),
+      min_acertos_saque:parseInt(document.getElementById('cfgMinAcertos').value||'5',10),
+      influencer_mode:document.getElementById('cfgInfluencerMode').value==='1',
+      influencer_meta_multiplicador:3
+  };
+  if (!influencerEasyAll) {
+    gamePayload.influencer_easy_users = Array.from(influencerEasyUsers).map(v=>Number(v)).filter(v=>v>0);
+  }
+
+  const payload={
+    game: gamePayload,
+    gateway:{ provider:document.getElementById('cfgGateway').value },
+    indicacao:{
+      comissao_nivel1_perc:parseFloat(document.getElementById('cfgComissaoPadrao').value||'5')
+    },
+    bonus_primeiro_deposito:{
+      enabled:document.getElementById('cfgBonusPrimeiroEnabled').value==='1',
+      modo_aplicacao:document.getElementById('cfgBonusPrimeiroModo').value,
+      percentual_bonus:parseFloat(document.getElementById('cfgBonusPrimeiroPerc').value||'100'),
+      rollover_multiplicador:parseFloat(document.getElementById('cfgBonusPrimeiroRollover').value||'3')
+    },
+    public:{
+      registro_aberto:document.getElementById('cfgRegistroAberto').value==='1',
+      site_nome:document.getElementById('cfgSiteNome').value.trim() || 'Tower Slot',
+      site_logo_url:document.getElementById('cfgLogo').value.trim() || null,
+      site_favicon_url:document.getElementById('cfgFavicon').value.trim() || null,
+      banner_url:bannerUrl || null,
+      banner_link:bannerLink || '',
+      banners: bannerUrl ? [{ url: bannerUrl, link: bannerLink || '' }] : []
+    }
+  };
+  try{
+    await req('PUT','/admin/config',payload);
+    document.getElementById('cfgMsg').className = 'muted msg-ok';
+    document.getElementById('cfgMsg').textContent='Config salva com sucesso.';
+    renderImagePreview('logoPreview', payload.public.site_logo_url || '', 'Sem logo definida (usa icone + nome)');
+    renderImagePreview('bannerPreview', payload.public.banner_url || '', 'Sem banner definido');
+  }catch(e){
+    document.getElementById('cfgMsg').className = 'muted msg-err';
+    document.getElementById('cfgMsg').textContent=e.message;
+  }
+}
+
+function isInfluencerEasy(user){
+  if(!user || Number(user.is_influencer) !== 1) return false;
+  if(influencerEasyAll) return true;
+  return influencerEasyUsers.has(Number(user.id));
+}
+
+function applyUsersFilter(resetPage = true){
+  const q = document.getElementById('usersBusca')?.value || '';
+  listState.users.query = q;
+  listState.users.filtered = listFilter(listState.users.raw, q, (u) => [
+    u.id,
+    u.telefone,
+    u.nome,
+    u.apelido_admin
+  ]);
+  if (resetPage) listState.users.page = 1;
+  renderUsersTable();
+}
+
+function renderUsersTable(){
+  const state = listState.users;
+  const body = document.getElementById('usersBody');
+  body.innerHTML = '';
+
+  const total = state.filtered.length;
+  if (!total) {
+    body.innerHTML = '<tr><td colspan="10" class="muted">Nenhum usuario encontrado.</td></tr>';
+    renderPager('usersPager', 1, 1, () => {});
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (state.page > totalPages) state.page = totalPages;
+  const start = (state.page - 1) * PAGE_SIZE;
+  const pageRows = state.filtered.slice(start, start + PAGE_SIZE);
+
+  pageRows.forEach(u => {
+    const easy = isInfluencerEasy(u);
+    const comissaoCustom = (u.comissao_indicacao_perc === null || u.comissao_indicacao_perc === undefined || u.comissao_indicacao_perc === '') ? null : Number(u.comissao_indicacao_perc);
+    const apelido = String(u.apelido_admin || '').trim();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${u.id}</td>
+      <td>${esc(u.telefone)}<div class="muted">${esc(u.nome || '-')}</div></td>
+      <td>${apelido ? esc(apelido) : '<span class="muted">Sem apelido</span>'}</td>
+      <td>${fmt(u.saldo)}</td>
+      <td>${fmt(u.saldo_afiliado)}</td>
+      <td>${comissaoCustom !== null ? `${comissaoCustom.toFixed(2)}%` : '<span class="muted">Padrao</span>'}</td>
+      <td>${u.is_admin ? '<span class="pill ok">SIM</span>' : '<span class="pill no">NAO</span>'}</td>
+      <td>${u.is_influencer ? '<span class="pill ok">SIM</span>' : '<span class="pill no">NAO</span>'}</td>
+      <td>${u.is_influencer ? (easy ? '<span class="pill ok">ON</span>' : '<span class="pill warn">OFF</span>') : '-'}</td>
+      <td>
+        <div class="actions">
+          <button data-act="influencer" data-id="${u.id}" data-flag="${u.is_influencer ? 0 : 1}">${u.is_influencer ? 'Remover' : 'Tornar'} influencer</button>
+          ${u.is_influencer ? `<button class="warn" data-act="easy" data-id="${u.id}" data-flag="${easy ? 0 : 1}">Facil ${easy ? 'OFF' : 'ON'}</button>` : ''}
+          <button class="gray" data-act="apelido" data-id="${u.id}" data-current="${esc(apelido)}">Apelido</button>
+          <button class="warn" data-act="comissao" data-id="${u.id}" data-current="${comissaoCustom ?? ''}">Comissao %</button>
+          <button class="green" data-act="credit" data-id="${u.id}" data-alvo="saldo">+ saldo</button>
+          <button class="gray" data-act="credit" data-id="${u.id}" data-alvo="saldo_afiliado">+ afiliado</button>
+          <button class="red" data-act="clear-afil" data-id="${u.id}">Limpar comissao</button>
+        </div>
+      </td>
+    `;
+
+    tr.querySelectorAll('button[data-act]').forEach(btn => {
+      btn.addEventListener('click', async (ev) => {
+        const el = ev.currentTarget;
+        const id = Number(el.dataset.id || 0);
+        const act = el.dataset.act || '';
+        try {
+          if (act === 'influencer') {
+            await req('PUT', `/admin/users/${id}/influencer`, { is_influencer: Number(el.dataset.flag || 0) });
+            await Promise.all([loadConfig(), loadUsers()]);
+            return;
+          }
+          if (act === 'easy') {
+            await req('PUT', `/admin/users/${id}/influencer-easy`, { enabled: Number(el.dataset.flag || 0) });
+            await Promise.all([loadConfig(), loadUsers()]);
+            return;
+          }
+          if (act === 'apelido') {
+            await setUserApelido(id, el.dataset.current || '');
+            return;
+          }
+          if (act === 'credit') {
+            await creditUser(id, el.dataset.alvo || 'saldo');
+            return;
+          }
+          if (act === 'comissao') {
+            await setUserComissao(id, el.dataset.current || '');
+            return;
+          }
+          if (act === 'clear-afil') {
+            await clearUserComissaoSaldo(id);
+            return;
+          }
+        } catch (e) {
+          alert(e.message || 'Erro na acao.');
+        }
+      });
+    });
+
+    body.appendChild(tr);
+  });
+
+  renderPager('usersPager', state.page, totalPages, (page) => {
+    state.page = page;
+    renderUsersTable();
+  });
+}
+
+async function loadUsers(){
+  const d = await req('GET', '/admin/users');
+  listState.users.raw = d.users || [];
+  applyUsersFilter(true);
+}
+
+async function creditUser(userId, alvo){
+  const alvoTxt = alvo === 'saldo_afiliado' ? 'saldo afiliado' : 'saldo principal';
+  const valorStr = prompt(`Valor para adicionar em ${alvoTxt} (R$):`, '10');
+  if (valorStr === null) return;
+  const valor = parseMoneyBR(valorStr);
+  if (!valor || valor <= 0) {
+    alert('Valor invalido.');
+    return;
+  }
+  const motivo = prompt('Motivo do ajuste (opcional):', '') || '';
+  await req('POST', `/admin/users/${userId}/credit`, { valor, alvo, motivo });
+  await loadUsers();
+}
+
+async function setUserApelido(userId, currentValue){
+  const valor = prompt('Defina um apelido para este usuario (deixe vazio para remover):', currentValue || '');
+  if (valor === null) return;
+  const apelido = String(valor).trim();
+  if (apelido.length > 120) {
+    alert('Apelido muito longo. Maximo 120 caracteres.');
+    return;
+  }
+  await req('PUT', `/admin/users/${userId}`, { apelido_admin: apelido });
+  await loadUsers();
+}
+
+async function setUserComissao(userId, currentValue){
+  const valorStr = prompt('Comissao personalizada (%)\nDigite vazio para remover e usar a padrao:', currentValue || '');
+  if (valorStr === null) return;
+  const raw = String(valorStr).trim();
+  let payloadValue = null;
+  if (raw !== '') {
+    const v = parseFloat(raw.replace(',', '.'));
+    if (!Number.isFinite(v) || v < 0 || v > 100) {
+      alert('Comissao invalida. Use valor entre 0 e 100.');
+      return;
+    }
+    payloadValue = v;
+  }
+  await req('PUT', `/admin/users/${userId}/comissao`, { comissao_indicacao_perc: payloadValue });
+  await loadUsers();
+}
+
+async function clearUserComissaoSaldo(userId){
+  if (!confirm('Limpar todo o saldo de comissao deste usuario?')) return;
+  const motivo = prompt('Motivo (opcional):', '') || '';
+  await req('POST', `/admin/users/${userId}/limpar-comissao`, { motivo });
+  await Promise.all([loadUsers(), loadSaquesAfiliado()]);
+}
+
+function applySaquesFilter(resetPage = true){
+  const q = document.getElementById('saquesBusca')?.value || '';
+  listState.saques.query = q;
+  listState.saques.filtered = listFilter(listState.saques.raw, q, (s) => [
+    s.id,
+    s.user_id,
+    s.telefone,
+    s.nome,
+    s.apelido_admin,
+    s.pix_chave,
+    s.nome_solicitante
+  ]);
+  if (resetPage) listState.saques.page = 1;
+  renderSaquesTable();
+}
+
+function renderSaquesTable(){
+  const state = listState.saques;
+  const body = document.getElementById('saquesBody');
+  body.innerHTML = '';
+
+  const total = state.filtered.length;
+  if (!total) {
+    document.getElementById('saquesMsg').textContent = 'Nenhum saque encontrado.';
+    body.innerHTML = '<tr><td colspan="9" class="muted">Nenhum saque encontrado.</td></tr>';
+    renderPager('saquesPager', 1, 1, () => {});
+    return;
+  }
+  document.getElementById('saquesMsg').textContent = '';
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (state.page > totalPages) state.page = totalPages;
+  const start = (state.page - 1) * PAGE_SIZE;
+  const pageRows = state.filtered.slice(start, start + PAGE_SIZE);
+
+  pageRows.forEach(s => {
+    const tr = document.createElement('tr');
+    const st = String(s.status || '').toLowerCase();
+    const apelidoNome = String(s.apelido_admin || '').trim() || String(s.nome || '').trim() || '-';
+    const statusPill = st === 'aprovado'
+      ? '<span class="pill ok">APROVADO</span>'
+      : (st === 'pendente' ? '<span class="pill warn">PENDENTE</span>' : '<span class="pill no">RECUSADO</span>');
+
+    tr.innerHTML = `
+      <td>${s.id}</td>
+      <td>${esc(s.telefone || '')}<div class="muted">ID ${s.user_id}</div></td>
+      <td>${esc(apelidoNome)}</td>
+      <td>${esc(s.tipo)}</td>
+      <td>${fmt(s.valor)}</td>
+      <td class="code">${esc(s.pix_chave || '-')}</td>
+      <td>${statusPill}</td>
+      <td>${esc(s.created_at || '')}</td>
+      <td>
+        <div class="actions">
+          ${st === 'pendente' ? `
+            <button class="green" data-saq="aprovar" data-id="${s.id}">Aprovar</button>
+            <button class="red" data-saq="recusar" data-id="${s.id}">Recusar</button>
+          ` : '-'}
+        </div>
+      </td>
+    `;
+
+    tr.querySelectorAll('button[data-saq]').forEach(btn => {
+      btn.addEventListener('click', async (ev) => {
+        const id = Number(ev.currentTarget.dataset.id || 0);
+        const act = ev.currentTarget.dataset.saq;
+        try {
+          if (act === 'aprovar') {
+            await req('PUT', `/admin/saques/${id}/aprovar`, {});
+          } else {
+            const motivo = prompt('Motivo da recusa (opcional):', '') || '';
+            await req('PUT', `/admin/saques/${id}/recusar`, { motivo });
+          }
+          await Promise.all([loadSaques(), loadUsers()]);
+        } catch (e) {
+          alert(e.message || 'Erro ao processar saque.');
+        }
+      });
+    });
+
+    body.appendChild(tr);
+  });
+
+  renderPager('saquesPager', state.page, totalPages, (page) => {
+    state.page = page;
+    renderSaquesTable();
+  });
+}
+
+async function loadSaques(){
+  const status = document.getElementById('saqueStatus').value || 'pendente';
+  const d = await req('GET', `/admin/saques?tipo=saque&status=${encodeURIComponent(status)}&limite=1000`);
+  listState.saques.raw = d.saques || [];
+  applySaquesFilter(true);
+}
+
+function applySaquesAfilFilter(resetPage = true){
+  const q = document.getElementById('saquesAfilBusca')?.value || '';
+  listState.saquesAfil.query = q;
+  listState.saquesAfil.filtered = listFilter(listState.saquesAfil.raw, q, (s) => [
+    s.id,
+    s.user_id,
+    s.telefone,
+    s.nome,
+    s.apelido_admin,
+    s.pix_chave,
+    s.nome_solicitante
+  ]);
+  if (resetPage) listState.saquesAfil.page = 1;
+  renderSaquesAfilTable();
+}
+
+function renderSaquesAfilTable(){
+  const state = listState.saquesAfil;
+  const body = document.getElementById('saquesAfilBody');
+  body.innerHTML = '';
+
+  const total = state.filtered.length;
+  if (!total) {
+    document.getElementById('saquesAfilMsg').textContent = 'Nenhum saque de comissão encontrado.';
+    body.innerHTML = '<tr><td colspan="8" class="muted">Nenhum saque de comissão encontrado.</td></tr>';
+    renderPager('saquesAfilPager', 1, 1, () => {});
+    return;
+  }
+  document.getElementById('saquesAfilMsg').textContent = '';
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (state.page > totalPages) state.page = totalPages;
+  const start = (state.page - 1) * PAGE_SIZE;
+  const pageRows = state.filtered.slice(start, start + PAGE_SIZE);
+
+  pageRows.forEach(s => {
+    const tr = document.createElement('tr');
+    const stRaw = String(s.status || '').toLowerCase();
+    const st = stRaw === 'aprovado' ? 'pago' : stRaw;
+    const apelidoNome = String(s.apelido_admin || '').trim() || String(s.nome || '').trim() || '-';
+    const statusPill = st === 'pago'
+      ? '<span class="pill ok">PAGO</span>'
+      : (st === 'pendente' ? '<span class="pill warn">PENDENTE</span>' : '<span class="pill no">RECUSADO</span>');
+
+    tr.innerHTML = `
+      <td>${s.id}</td>
+      <td>${esc(s.telefone || '')}<div class="muted">ID ${s.user_id}</div></td>
+      <td>${esc(apelidoNome)}</td>
+      <td class="code">${esc(s.pix_chave || '-')}</td>
+      <td>${fmt(s.valor)}</td>
+      <td>${statusPill}</td>
+      <td>${esc(s.created_at || '')}</td>
+      <td>
+        <div class="actions">
+          ${st === 'pendente' ? `
+            <button class="green" data-saqafil="pago" data-id="${s.id}">Pago</button>
+            <button class="red" data-saqafil="recusar" data-id="${s.id}">Recusar</button>
+          ` : '-'}
+          <button class="gray" data-saqafil="limpar" data-user-id="${s.user_id}">Limpar saldo de comissao</button>
+        </div>
+      </td>
+    `;
+
+    tr.querySelectorAll('button[data-saqafil]').forEach(btn => {
+      btn.addEventListener('click', async (ev) => {
+        const el = ev.currentTarget;
+        const act = el.dataset.saqafil;
+        const id = Number(el.dataset.id || 0);
+        const uid = Number(el.dataset.userId || 0);
+        try {
+          if (act === 'pago') {
+            await req('PUT', `/admin/saques/${id}/aprovar`, {});
+          } else if (act === 'recusar') {
+            const motivo = prompt('Motivo da recusa (opcional):', '') || '';
+            await req('PUT', `/admin/saques/${id}/recusar`, { motivo });
+          } else if (act === 'limpar') {
+            if (!uid) return;
+            const motivo = prompt('Motivo da limpeza (opcional):', '') || '';
+            await req('POST', `/admin/users/${uid}/limpar-comissao`, { motivo });
+          }
+          await Promise.all([loadSaquesAfiliado(), loadUsers()]);
+        } catch (e) {
+          alert(e.message || 'Erro ao processar saque de comissão.');
+        }
+      });
+    });
+
+    body.appendChild(tr);
+  });
+
+  renderPager('saquesAfilPager', state.page, totalPages, (page) => {
+    state.page = page;
+    renderSaquesAfilTable();
+  });
+}
+
+async function loadSaquesAfiliado(){
+  const status = document.getElementById('saqueAfilStatus').value || 'pendente';
+  const d = await req('GET', `/admin/saques?tipo=saque_afiliado&status=${encodeURIComponent(status)}&limite=1000`);
+  listState.saquesAfil.raw = d.saques || [];
+  applySaquesAfilFilter(true);
+}
+
+async function loadBonusPrimeiroDepositoUsers(){
+  const d = await req('GET', '/admin/bonus-primeiro-deposito?limite=500');
+  const body = document.getElementById('bonusPrimeiroBody');
+  body.innerHTML = '';
+  const list = d.usuarios || [];
+  if (!list.length) {
+    document.getElementById('bonusPrimeiroMsg').textContent = 'Nenhum usuario com bonus de primeiro deposito.';
+    return;
+  }
+  document.getElementById('bonusPrimeiroMsg').textContent = '';
+
+  list.forEach(u => {
+    const tr = document.createElement('tr');
+    const st = String(u.status_rollover || '').toLowerCase();
+    const statusPill = st === 'liberado'
+      ? '<span class="pill ok">LIBERADO</span>'
+      : '<span class="pill warn">BLOQUEADO</span>';
+    tr.innerHTML = `
+      <td>${u.id}</td>
+      <td>${esc(u.telefone || '')}<div class="muted">${esc(u.nome || '')}</div></td>
+      <td>${fmt(u.primeiro_deposito_valor)}</td>
+      <td>${fmt(u.bonus_primeiro_deposito_valor)}</td>
+      <td>${fmt(u.primeiro_deposito_total_com_bonus)}</td>
+      <td>${fmt(u.rollover_exigido_bonus)}</td>
+      <td>${fmt(u.rollover_cumprido_bonus)}</td>
+      <td>${fmt(u.rollover_restante_bonus)}</td>
+      <td>${statusPill}</td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+document.getElementById('btnLogin').addEventListener('click',login);
+document.getElementById('btnLogout').addEventListener('click',logout);
+document.getElementById('btnSalvarCfg').addEventListener('click',saveConfig);
+document.getElementById('btnReloadUsers').addEventListener('click',()=>Promise.all([loadConfig(),loadUsers()]));
+document.getElementById('usersBusca').addEventListener('input', () => applyUsersFilter(true));
+document.getElementById('btnReloadSaques').addEventListener('click',loadSaques);
+document.getElementById('saqueStatus').addEventListener('change',loadSaques);
+document.getElementById('saquesBusca').addEventListener('input', () => applySaquesFilter(true));
+document.getElementById('btnReloadSaquesAfil').addEventListener('click',loadSaquesAfiliado);
+document.getElementById('saqueAfilStatus').addEventListener('change',loadSaquesAfiliado);
+document.getElementById('saquesAfilBusca').addEventListener('input', () => applySaquesAfilFilter(true));
+document.getElementById('btnReloadBonusPrimeiro').addEventListener('click',loadBonusPrimeiroDepositoUsers);
+document.getElementById('cfgLogo').addEventListener('input', e => renderImagePreview('logoPreview', e.target.value.trim(), 'Sem logo definida (usa icone + nome)'));
+document.getElementById('cfgBannerUrl').addEventListener('input', e => renderImagePreview('bannerPreview', e.target.value.trim(), 'Sem banner definido'));
+document.getElementById('btnUploadLogo').addEventListener('click', () => runImageUpload({
+  kind: 'logo',
+  fileInputId: 'cfgLogoFile',
+  urlInputId: 'cfgLogo',
+  msgId: 'cfgLogoUploadMsg',
+  previewId: 'logoPreview',
+  previewFallback: 'Sem logo definida (usa icone + nome)'
+}));
+document.getElementById('btnUploadBanner').addEventListener('click', () => runImageUpload({
+  kind: 'banner',
+  fileInputId: 'cfgBannerFile',
+  urlInputId: 'cfgBannerUrl',
+  msgId: 'cfgBannerUploadMsg',
+  previewId: 'bannerPreview',
+  previewFallback: 'Sem banner definido'
+}));
+document.getElementById('btnUploadFavicon').addEventListener('click', () => runImageUpload({
+  kind: 'favicon',
+  fileInputId: 'cfgFaviconFile',
+  urlInputId: 'cfgFavicon',
+  msgId: 'cfgFaviconUploadMsg'
+}));
+document.getElementById('cfgLogoFile').addEventListener('change', () => runImageUpload({
+  kind: 'logo',
+  fileInputId: 'cfgLogoFile',
+  urlInputId: 'cfgLogo',
+  msgId: 'cfgLogoUploadMsg',
+  previewId: 'logoPreview',
+  previewFallback: 'Sem logo definida (usa icone + nome)'
+}));
+document.getElementById('cfgBannerFile').addEventListener('change', () => runImageUpload({
+  kind: 'banner',
+  fileInputId: 'cfgBannerFile',
+  urlInputId: 'cfgBannerUrl',
+  msgId: 'cfgBannerUploadMsg',
+  previewId: 'bannerPreview',
+  previewFallback: 'Sem banner definido'
+}));
+document.getElementById('cfgFaviconFile').addEventListener('change', () => runImageUpload({
+  kind: 'favicon',
+  fileInputId: 'cfgFaviconFile',
+  urlInputId: 'cfgFavicon',
+  msgId: 'cfgFaviconUploadMsg'
+}));
+document.querySelectorAll('.admin-side-btn[data-go]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.getAttribute('data-go');
+    const el = id ? document.getElementById(id) : null;
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+bootPanel();
+</script>
+</body>
+</html>
